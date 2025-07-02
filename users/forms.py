@@ -50,3 +50,16 @@ class RegisterForm(UserCreationForm):
             'password1': forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'أدخل كلمة المرور', 'id': 'password1', 'name': 'password1'}),
             'password2': forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'أعد إدخال كلمة المرور', 'id': 'password2', 'name': 'password2'}),
         }
+        
+
+
+class ProfileUpdate(forms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ('first_name', 'last_name', 'username', 'email')
+        widgets = {
+            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل الاسم الأول'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل الاسم الأخير'}),
+            'username': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل اسم المستخدم'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'example@example.com'})
+        }

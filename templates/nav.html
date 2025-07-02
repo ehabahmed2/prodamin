@@ -65,7 +65,7 @@
                             {{ user.first_name|default:user.username }}
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">
+                            <li><a class="dropdown-item" href="{% url "profile" %}">
                                 <i class="fas fa-user"></i> الملف الشخصي
                             </a></li>
                             <li><a class="dropdown-item" href="#">

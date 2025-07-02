@@ -1,0 +1,350 @@
+{% extends 'base.html' %}
+
+{% block title %}لوحة التحكم - Prodamin{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-6 mb-0">
+                <i class="fas fa-tachometer-alt text-primary"></i>
+                مرحباً، {{ user.first_name|default:user.username }}!
+            </h1>
+            <p class="text-muted">إليك نظرة شاملة على إنجازاتك وتقدمك</p>
+        </div>
+    </div>
+
+    <!-- Quick Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-primary h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h5 class="card-title text-primary">إجمالي المهام</h5>
+                            <h2 class="mb-0">{{ total_tasks }}</h2>
+                        </div>
+                        <i class="fas fa-tasks fa-2x text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-success h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h5 class="card-title text-success">المهام المُنجزة</h5>
+                            <h2 class="mb-0">{{ completed_tasks }}</h2>
+                        </div>
+                        <i class="fas fa-check-circle fa-2x text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-warning h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h5 class="card-title text-warning">المهام المعلقة</h5>
+                            <h2 class="mb-0">{{ pending_tasks }}</h2>
+                        </div>
+                        <i class="fas fa-clock fa-2x text-warning"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-info h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h5 class="card-title text-info">النقاط المتاحة</h5>
+                            <h2 class="mb-0">{{ user_points.available_points }}</h2>
+                        </div>
+                        <i class="fas fa-coins fa-2x text-accent"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress and Charts Row -->
+    <div class="row mb-4">
+        <!-- Completion Rate -->
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-percentage text-primary"></i>
+                        معدل الإنجاز
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="progress mb-3" style="height: 20px;">
+                        <div class="progress-bar" role="progressbar" style="width: {{ completion_rate }}%">
+                            {{ completion_rate|floatformat:1 }}%
+                        </div>
+                    </div>
+                    <p class="text-muted">معدل إنجاز رائع! استمر هكذا</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Weekly Productivity Chart -->
+        <div class="col-lg-8 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line text-success"></i>
+                        الإنتاجية الأسبوعية
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="productivityChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Tasks and Rewards Row -->
+    <div class="row mb-4">
+        <!-- Recent Tasks -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-tasks text-primary"></i>
+                        المهام الأخيرة
+                    </h5>
+                    <a href="#" class="btn btn-sm btn-outline-primary">عرض الكل</a>
+                </div>
+                <div class="card-body">
+                    {% if recent_tasks %}
+                        <div class="list-group list-group-flush">
+                            {% for task in recent_tasks %}
+                                <div class="list-group-item px-0">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1">
+                                                <a href="#" class="text-decoration-none">
+                                                    {{ task.title }}
+                                                </a>
+                                            </h6>
+                                            <small class="text-muted">{{ task.created_at|timesince }}</small>
+                                        </div>
+                                        <div>
+                                            {% if task.status == 'completed' %}
+                                                <span class="badge bg-success">مُنجز</span>
+                                            {% elif task.status == 'in_progress' %}
+                                                <span class="badge bg-info">قيد التنفيذ</span>
+                                            {% elif task.status == 'pending' %}
+                                                <span class="badge bg-warning">معلق</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-plus-circle fa-3x mb-3"></i>
+                            <p>لا توجد مهام بعد</p>
+                            <a href="#" class="btn btn-primary">إنشاء مهمة جديدة</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Suggested Rewards -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-gift text-accent"></i>
+                        المكافآت المقترحة
+                    </h5>
+                    <a href="#" class="btn btn-sm btn-outline-warning">عرض الكل</a>
+                </div>
+                <div class="card-body">
+                    {% if suggested_rewards %}
+                        {% for reward in suggested_rewards %}
+                            <div class="card mb-3 border-0" style="background: linear-gradient(45deg, #FFF8E1, #FFFFFF);">
+                                <div class="card-body py-3">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <h6 class="card-title mb-1">{{ reward.title }}</h6>
+                                            <p class="card-text small text-muted">{{ reward.description|truncatechars:50 }}</p>
+                                        </div>
+                                        <div class="text-end">
+                                            <div class="badge bg-warning mb-2">{{ reward.points_value }} نقطة</div>
+                                            <div>
+                                                {% if user_points.available_points >= reward.points_value %}
+                                                    <button class="btn btn-sm btn-primary claim-reward" data-reward-id="{{ reward.id }}">
+                                                        احصل عليها
+                                                    </button>
+                                                {% else %}
+                                                    <small class="text-muted">
+                                                        {% comment %} تحتاج {{ reward.points_value|sub:user_points.available_points }} نقطة {% endcomment %}
+                                                    </small>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-gift fa-3x mb-3"></i>
+                            <p>أنجز مهامك للحصول على مكافآت مخصصة!</p>
+                            <a href="#" class="btn btn-accent">حدد اهتماماتك</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overdue Tasks Alert -->
+    {% if overdue_tasks %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="alert alert-warning d-flex align-items-center">
+                    <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+                    <div class="flex-grow-1">
+                        <h5 class="alert-heading mb-1">تنبيه: مهام متأخرة!</h5>
+                        <p class="mb-0">لديك {{ overdue_tasks.count }} مهمة تجاوزت تاريخ الاستحقاق. يرجى مراجعتها.</p>
+                    </div>
+                    <a href="#" class="btn btn-warning">مراجعة المهام</a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Recent Achievements -->
+    {% if recent_achievements %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-trophy text-accent"></i>
+                            إنجازاتك الأخيرة
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            {% for achievement in recent_achievements %}
+                                <div class="col-md-4 mb-3">
+                                    <div class="text-center">
+                                        <i class="{{ achievement.icon }} fa-3x text-accent mb-2"></i>
+                                        <h6>{{ achievement.name }}</h6>
+                                        <p class="text-muted small">{{ achievement.description|truncatechars:50 }}</p>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Quick Actions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bolt text-primary"></i>
+                        إجراءات سريعة
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap gap-3">
+                        <a href="#" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> إنشاء مهمة جديدة
+                        </a>
+                        <a href="#" class="btn btn-outline-primary">
+                            <i class="fas fa-calendar"></i> عرض التقويم
+                        </a>
+                        <a href="#" class="btn btn-accent">
+                            <i class="fas fa-shopping-cart"></i> متجر المكافآت
+                        </a>
+                        <a href="#" class="btn btn-outline-success">
+                            <i class="fas fa-bullseye"></i> أهدافي
+                        </a>
+                        <a href="#" class="btn btn-outline-info">
+                            <i class="fas fa-chart-bar"></i> التحليلات
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // رسم الإنتاجية الأسبوعية
+    const ctx = document.getElementById('productivityChart').getContext('2d');
+    const productivityChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [
+                {% for day in productivity_data %}
+                    '{{ day.date }}'{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ],
+            datasets: [{
+                label: 'المهام المُنجزة',
+                data: [
+                    {% for day in productivity_data %}
+                        {{ day.tasks }}{% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ],
+                borderColor: '#4CAF50',
+                backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+
+    // الحصول على المكافآت - Disabled to prevent errors
+    $('.claim-reward').on('click', function(e) {
+        e.preventDefault();
+        alert('هذه الميزة غير متاحة حالياً أثناء التطوير');
+    });
+</script>
+{% endblock %}

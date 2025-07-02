@@ -18,7 +18,22 @@
                     <!-- Login Form -->
                     <form method="post" action="{% url 'login' %}">
                         {% csrf_token %}
-                        
+                        <!-- Styled Form Errors -->
+                                {% if form.errors %}
+                                    <div class="alert alert-danger mt-3">
+                                        <h6 class="alert-heading">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>
+                                            حدث الأخطاء التالية:
+                                        </h6>
+                                        <ul class="mb-0 ps-3">
+                                            {% for field, errors in form.errors.items %}
+                                                {% for error in errors %}
+                                                    <li>{{ error }}</li>
+                                                {% endfor %}
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                {% endif %}
                         <div class="mb-3">
                             <label for="username" class="form-label">
                                 <i class="fas fa-user text-primary"></i>

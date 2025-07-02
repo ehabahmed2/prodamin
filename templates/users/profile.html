@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+{% block title %}تعديل الملف الشخصي - Prodamin{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow border-0">
+                <div class="card-body p-5">
+                    <!-- Header -->
+                    <div class="text-center mb-4">
+                        <i class="fas fa-user-circle fa-3x text-primary mb-3"></i>
+                        <h2 class="card-title">تعديل الملف الشخصي</h2>
+                        <p class="text-muted">تحديث معلومات حسابك</p>
+                    </div>
+
+                    <!-- Profile Form -->
+                    <form method="post" action="{% url 'profile' %}" id="profileForm">
+                        {% csrf_token %}
+                        
+                        <!-- Form Errors -->
+                        {% if form.errors %}
+                            <div class="alert alert-danger mb-4">
+                                <h6 class="alert-heading">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    حدثت الأخطاء التالية:
+                                </h6>
+                                <ul class="mb-0 ps-3">
+                                    {% for field, errors in form.errors.items %}
+                                        {% for error in errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+
+                        <!-- Success Message -->
+                        {% if success %}
+                            <div class="alert alert-success mb-4">
+                                <i class="fas fa-check-circle me-2"></i>
+                                تم تحديث معلوماتك بنجاح!
+                            </div>
+                        {% endif %}
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="first_name" class="form-label">
+                                    <i class="fas fa-user text-primary"></i>
+                                    الاسم الأول
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="first_name" 
+                                       name="first_name"
+                                       value="{{ user.first_name }}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="last_name" class="form-label">
+                                    <i class="fas fa-user text-primary"></i>
+                                    الاسم الأخير
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="last_name" 
+                                       name="last_name"
+                                       value="{{ user.last_name }}">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="username" class="form-label">
+                                <i class="fas fa-at text-primary"></i>
+                                اسم المستخدم *
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="username" 
+                                   name="username"
+                                   value="{{ user.username }}"
+                                   required>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle"></i>
+                                يجب أن يكون فريداً ولا يحتوي على مسافات
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="email" class="form-label">
+                                <i class="fas fa-envelope text-primary"></i>
+                                البريد الإلكتروني *
+                            </label>
+                            <input type="email" 
+                                   class="form-control" 
+                                   id="email" 
+                                   name="email"
+                                   value="{{ user.email }}"
+                                   required>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
+                            <i class="fas fa-save"></i>
+                            حفظ التغييرات
+                        </button>
+                    </form>
+
+                    <!-- Password Change Section -->
+                    <div class="card mt-4 border-warning">
+                        <div class="card-body">
+                            <h5 class="card-title text-warning">
+                                <i class="fas fa-lock me-2"></i>
+                                إدارة كلمة المرور
+                            </h5>
+                            <p class="card-text">
+                                لتغيير كلمة المرور الخاصة بك، يرجى استخدام الرابط أدناه.
+                            </p>
+                            <a href="#" class="btn btn-outline-warning">
+                                <i class="fas fa-key"></i>
+                                تغيير كلمة المرور
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Account Actions -->
+                    <div class="mt-4 text-center">
+                        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary me-2">
+                            <i class="fas fa-home"></i>
+                            العودة للرئيسية
+                        </a>
+                        <a href="{% url 'logout' %}" class="btn btn-outline-danger">
+                            <i class="fas fa-sign-out-alt"></i>
+                            تسجيل الخروج
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-focus on first name field
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('first_name').focus();
+    });
+
+    // Form validation
+    document.getElementById('profileForm').addEventListener('submit', function(e) {
+        const email = document.getElementById('email').value.trim();
+        const username = document.getElementById('username').value.trim();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        
+        // Validate email format
+        if (!emailRegex.test(email)) {
+            e.preventDefault();
+            alert('البريد الإلكتروني غير صحيح!');
+            return false;
+        }
+        
+        // Validate username length
+        if (username.length < 3) {
+            e.preventDefault();
+            alert('اسم المستخدم يجب أن يكون 3 أحرف على الأقل!');
+            return false;
+        }
+        
+        // Show loading state
+        const submitBtn = this.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
+    });
+</script>
+{% endblock %}
