@@ -1,0 +1,740 @@
+{% extends 'base.html' %}
+
+{% block title %}إدارة المهام - Prodamin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .task-management-container {
+        background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .dashboard-header {
+        background: linear-gradient(120deg, #4b6cb7, #182848);
+        color: white;
+        padding: 25px 30px;
+        position: relative;
+    }
+    
+    .dashboard-header::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 200px;
+        height: 100%;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23ffffff' fill-opacity='0.1' d='M0,128L48,117.3C96,107,192,85,288,101.3C384,117,480,171,576,186.7C672,203,768,181,864,160C960,139,1056,117,1152,128C1248,139,1344,181,1392,202.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
+        background-size: cover;
+        opacity: 0.2;
+    }
+    
+    .task-counter {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 10px;
+        padding: 12px 20px;
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .task-card {
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        border-left: 4px solid;
+        overflow: hidden;
+        position: relative;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    .task-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .priority-low { border-left-color: #28a745; }
+    .priority-medium { border-left-color: #ffc107; }
+    .priority-high { border-left-color: #dc3545; }
+    
+    .completed-task {
+        background: rgba(40, 167, 69, 0.05);
+        border-left-color: #28a745 !important;
+    }
+    
+    .today-task {
+        border: 2px solid #4b6cb7;
+        position: relative;
+    }
+    
+    .today-task::after {
+        content: "اليوم";
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: #4b6cb7;
+        color: white;
+        font-size: 0.7rem;
+        padding: 3px 8px;
+        border-radius: 4px;
+    }
+    
+    .overdue-task {
+        border-left-color: #dc3545 !important;
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.2); }
+        70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+    }
+    
+    .task-actions {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .task-card:hover .task-actions {
+        opacity: 1;
+    }
+    
+    .section-toggle {
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .section-toggle:hover {
+        background: rgba(75, 108, 183, 0.05);
+    }
+    
+    .filter-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+    
+    .badge-due {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .badge-today {
+        background: #4b6cb7;
+        color: white;
+    }
+    
+    .badge-overdue {
+        background: #dc3545;
+        color: white;
+    }
+    
+    .progress-xs {
+        height: 6px;
+    }
+    
+    .empty-state {
+        background: rgba(248, 249, 250, 0.7);
+        border: 2px dashed #dee2e6;
+        border-radius: 12px;
+        padding: 40px 20px;
+        text-align: center;
+    }
+    
+    .sortable-header {
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .sortable-header:hover {
+        color: #4b6cb7;
+    }
+    
+    .task-checkbox {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        border: 2px solid #dee2e6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .task-checkbox.checked {
+        background: #28a745;
+        border-color: #28a745;
+    }
+    
+    .task-checkbox.checked::after {
+        content: "✓";
+        color: white;
+        font-size: 12px;
+    }
+    
+    .priority-indicator {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="task-management-container">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1 class="display-6 mb-3">
+                        <i class="fas fa-tasks me-2"></i>
+                        لوحة إدارة المهام
+                    </h1>
+                    <p class="lead mb-0">نظرة شاملة على جميع مهامك وإنجازاتك</p>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex justify-content-end">
+                        <div class="task-counter me-3">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-clipboard-list fa-2x me-3"></i>
+                                <div>
+                                    <h4 class="mb-0">{{ total_tasks }} مهام</h4>
+                                    <small class="opacity-75">إجمالي المهام</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-counter">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-check-circle fa-2x me-3"></i>
+                                <div>
+                                    <h4 class="mb-0">{{ completed_tasks }} مكتملة</h4>
+                                    <small class="opacity-75">معدل إنجاز {{ completion_rate }}%</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="p-4">
+            <div class="row">
+                <!-- Filters Column -->
+                <div class="col-lg-3 mb-4">
+                    <div class="filter-card p-3 mb-4">
+                        <h5 class="mb-3">
+                            <i class="fas fa-filter me-2 text-primary"></i>
+                            تصفية المهام
+                        </h5>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">حالة المهمة</label>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="filter-completed" checked>
+                                <label class="form-check-label" for="filter-completed">
+                                    المهام المكتملة
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="filter-pending" checked>
+                                <label class="form-check-label" for="filter-pending">
+                                    المهام المعلقة
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="filter-overdue" checked>
+                                <label class="form-check-label" for="filter-overdue">
+                                    المهام المتأخرة
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">مستوى الأهمية</label>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="filter-high" checked>
+                                <label class="form-check-label" for="filter-high">
+                                    <span class="priority-indicator bg-danger"></span>
+                                    عالي
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="filter-medium" checked>
+                                <label class="form-check-label" for="filter-medium">
+                                    <span class="priority-indicator bg-warning"></span>
+                                    متوسط
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="filter-low" checked>
+                                <label class="form-check-label" for="filter-low">
+                                    <span class="priority-indicator bg-success"></span>
+                                    منخفض
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">نطاق التاريخ</label>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="filter-today" checked>
+                                <label class="form-check-label" for="filter-today">
+                                    مهام اليوم
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="filter-upcoming" checked>
+                                <label class="form-check-label" for="filter-upcoming">
+                                    المهام القادمة
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="filter-no-date" checked>
+                                <label class="form-check-label" for="filter-no-date">
+                                    بدون تاريخ
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-primary w-100">
+                            <i class="fas fa-sync-alt me-2"></i>
+                            تطبيق الفلتر
+                        </button>
+                    </div>
+                    
+                    <div class="filter-card p-3">
+                        <h5 class="mb-3">
+                            <i class="fas fa-plus-circle me-2 text-success"></i>
+                            إضافة سريعة
+                        </h5>
+                        <a href="{% url 'create_task' %}" class="btn btn-success w-100 mb-3">
+                            <i class="fas fa-plus me-2"></i>
+                            مهمة جديدة
+                        </a>
+                        <p class="small text-muted text-center">
+                            أو استخدم الاختصار <kbd>Ctrl</kbd> + <kbd>N</kbd>
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Tasks Column -->
+                <div class="col-lg-9">
+                    <!-- Task Controls -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="d-flex">
+                            <div class="dropdown me-2">
+                                <button class="btn btn-outline-primary dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown">
+                                    <i class="fas fa-sort me-2"></i>
+                                    ترتيب حسب: التاريخ
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#">التاريخ (الأقدم أولاً)</a></li>
+                                    <li><a class="dropdown-item" href="#">التاريخ (الأحدث أولاً)</a></li>
+                                    <li><a class="dropdown-item" href="#">الأهمية (من أعلى إلى أقل)</a></li>
+                                    <li><a class="dropdown-item" href="#">الأهمية (من أقل إلى أعلى)</a></li>
+                                </ul>
+                            </div>
+                            
+                            <div class="input-group" style="width: 250px;">
+                                <input type="text" class="form-control" placeholder="ابحث في المهام...">
+                                <button class="btn btn-primary" type="button">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-outline-secondary">
+                                    <i class="fas fa-th-list"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary active">
+                                    <i class="fas fa-grip-horizontal"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary">
+                                    <i class="fas fa-calendar"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Progress Summary -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="mb-0">تقدم المهام الشهري</h6>
+                                <span class="badge bg-primary">75% إنجاز</span>
+                            </div>
+                            <div class="progress progress-xs mb-1">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: 75%"></div>
+                            </div>
+                            <div class="d-flex justify-content-between small text-muted">
+                                <span>22/30 مهمة</span>
+                                <span>5 أيام متبقية</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Today's Tasks Section -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4 class="mb-0">
+                                <i class="fas fa-sun text-warning me-2"></i>
+                                مهام اليوم
+                                <span class="badge bg-primary rounded-pill">{{ today_tasks|length }}</span>
+                            </h4>
+                            <div>
+                                <button class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-expand-arrows-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        {% if today_tasks %}
+                        <div class="row g-3">
+                            {% for task in today_tasks %}
+                            <div class="col-md-6">
+                                <div class="task-card p-3 {% if task.due_date < today %}overdue-task{% else %}today-task{% endif %} priority-{{ task.get_priority_display|lower }}">
+                                    <div class="task-actions">
+                                        <button class="btn btn-sm btn-light me-1" title="تعديل">
+                                            <i class="fas fa-edit text-primary"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-light" title="حذف">
+                                            <i class="fas fa-trash text-danger"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="d-flex align-items-start">
+                                        <div class="task-checkbox me-3 {% if task.is_completed %}checked{% endif %}" 
+                                             data-task-id="{{ task.id }}"></div>
+                                        <div class="flex-grow-1">
+                                            <h5 class="mb-1">{{ task.title }}</h5>
+                                            <p class="text-muted small mb-2">{{ task.description|truncatechars:80 }}</p>
+                                            
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <span class="badge bg-{% if task.due_date < today %}overdue{% else %}today{% endif %} me-2">
+                                                        <i class="fas fa-calendar me-1"></i>
+                                                        {{ task.due_date|date:"d M" }}
+                                                    </span>
+                                                    <span class="badge bg-{% if task.priority == 3 %}danger{% elif task.priority == 2 %}warning{% else %}success{% endif %}">
+                                                        {% if task.priority == 3 %}عالي{% elif task.priority == 2 %}متوسط{% else %}منخفض{% endif %}
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <span class="badge bg-light text-dark">
+                                                        <i class="fas fa-clock me-1"></i>
+                                                        {{ task.created_at|timesince }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                            <h5 class="mb-2">لا توجد مهام لهذا اليوم!</h5>
+                            <p class="text-muted">استمتع بيومك أو أضف مهام جديدة</p>
+                            <a href="{% url 'create_task' %}" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>
+                                إضافة مهمة
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Upcoming Tasks Section -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4 class="mb-0">
+                                <i class="fas fa-calendar-alt text-info me-2"></i>
+                                المهام القادمة
+                                <span class="badge bg-primary rounded-pill">{{ upcoming_tasks|length }}</span>
+                            </h4>
+                            <div>
+                                <button class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-expand-arrows-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        {% if upcoming_tasks %}
+                        <div class="row g-3">
+                            {% for task in upcoming_tasks %}
+                            <div class="col-md-4">
+                                <div class="task-card p-3 priority-{{ task.get_priority_display|lower }}">
+                                    <div class="task-actions">
+                                        <button class="btn btn-sm btn-light me-1" title="تعديل">
+                                            <i class="fas fa-edit text-primary"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-light" title="حذف">
+                                            <i class="fas fa-trash text-danger"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="d-flex align-items-start">
+                                        <div class="task-checkbox me-3 {% if task.is_completed %}checked{% endif %}" 
+                                             data-task-id="{{ task.id }}"></div>
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1">{{ task.title }}</h6>
+                                            <p class="text-muted small mb-2">{{ task.description|truncatechars:60 }}</p>
+                                            
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="badge bg-light text-dark">
+                                                    <i class="fas fa-calendar me-1"></i>
+                                                    {{ task.due_date|date:"d M" }}
+                                                </span>
+                                                <span class="badge bg-{% if task.priority == 3 %}danger{% elif task.priority == 2 %}warning{% else %}success{% endif %}">
+                                                    {% if task.priority == 3 %}عالي{% elif task.priority == 2 %}متوسط{% else %}منخفض{% endif %}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-calendar-check fa-3x text-info mb-3"></i>
+                            <h5 class="mb-2">لا توجد مهام قادمة</h5>
+                            <p class="text-muted">أضف مهام جديدة للتخطيط للمستقبل</p>
+                            <a href="{% url 'create_task' %}" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>
+                                إضافة مهمة
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Completed Tasks Section -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4 class="mb-0">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                المهام المكتملة
+                                <span class="badge bg-success rounded-pill">{{ completed_tasks|length }}</span>
+                            </h4>
+                            <div>
+                                <button class="btn btn-sm btn-outline-secondary toggle-completed" 
+                                        data-bs-toggle="collapse" 
+                                        data-bs-target="#completedTasks">
+                                    <i class="fas fa-eye-slash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id="completedTasks" class="collapse show">
+                            {% if completed_tasks %}
+                            <div class="row g-3">
+                                {% for task in completed_tasks %}
+                                <div class="col-md-4">
+                                    <div class="task-card p-3 completed-task">
+                                        <div class="task-actions">
+                                            <button class="btn btn-sm btn-light me-1" title="إعادة فتح">
+                                                <i class="fas fa-redo text-info"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-light" title="حذف">
+                                                <i class="fas fa-trash text-danger"></i>
+                                            </button>
+                                        </div>
+                                        
+                                        <div class="d-flex align-items-start">
+                                            <div class="task-checkbox me-3 checked" 
+                                                 data-task-id="{{ task.id }}"></div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-1">{{ task.title }}</h6>
+                                                <p class="text-muted small mb-2">{{ task.description|truncatechars:60 }}</p>
+                                                
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <span class="badge bg-light text-dark">
+                                                        <i class="fas fa-calendar me-1"></i>
+                                                        {{ task.due_date|date:"d M" }}
+                                                    </span>
+                                                    <span class="badge bg-success">
+                                                        <i class="fas fa-check me-1"></i>
+                                                        مكتملة
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="empty-state">
+                                <i class="fas fa-inbox fa-3x text-secondary mb-3"></i>
+                                <h5 class="mb-2">لا توجد مهام مكتملة</h5>
+                                <p class="text-muted">ابدأ بإنجاز مهامك لتراها هنا</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Overdue Tasks Section -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4 class="mb-0">
+                                <i class="fas fa-exclamation-triangle text-danger me-2"></i>
+                                المهام المتأخرة
+                                <span class="badge bg-danger rounded-pill">{{ overdue_tasks|length }}</span>
+                            </h4>
+                            <div>
+                                <button class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-expand-arrows-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        {% if overdue_tasks %}
+                        <div class="row g-3">
+                            {% for task in overdue_tasks %}
+                            <div class="col-md-6">
+                                <div class="task-card p-3 overdue-task">
+                                    <div class="task-actions">
+                                        <button class="btn btn-sm btn-light me-1" title="تعديل">
+                                            <i class="fas fa-edit text-primary"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-light" title="حذف">
+                                            <i class="fas fa-trash text-danger"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="d-flex align-items-start">
+                                        <div class="task-checkbox me-3" 
+                                             data-task-id="{{ task.id }}"></div>
+                                        <div class="flex-grow-1">
+                                            <h5 class="mb-1">{{ task.title }}</h5>
+                                            <p class="text-muted small mb-2">{{ task.description|truncatechars:80 }}</p>
+                                            
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <span class="badge bg-danger me-2">
+                                                        <i class="fas fa-clock me-1"></i>
+                                                        متأخرة {{ task.due_date|timesince }}
+                                                    </span>
+                                                    <span class="badge bg-{% if task.priority == 3 %}danger{% elif task.priority == 2 %}warning{% else %}success{% endif %}">
+                                                        {% if task.priority == 3 %}عالي{% elif task.priority == 2 %}متوسط{% else %}منخفض{% endif %}
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <button class="btn btn-sm btn-outline-danger">
+                                                        <i class="fas fa-bolt me-1"></i>
+                                                        إكمال عاجل
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-check-double fa-3x text-success mb-3"></i>
+                            <h5 class="mb-2">لا توجد مهام متأخرة!</h5>
+                            <p class="text-muted">أحسنت! جميع مهامك محدثة</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Task checkbox functionality
+    document.querySelectorAll('.task-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('click', function() {
+            const taskId = this.getAttribute('data-task-id');
+            const isCompleted = this.classList.contains('checked');
+            
+            // Toggle visual state
+            this.classList.toggle('checked');
+            
+            // Find parent task card
+            const taskCard = this.closest('.task-card');
+            
+            // If marking as complete
+            if (!isCompleted) {
+                // Add completed class after animation
+                setTimeout(() => {
+                    taskCard.classList.add('completed-task');
+                    
+                    // Move to completed section (in a real app, this would be an AJAX call)
+                    if (!taskCard.classList.contains('completed-task')) {
+                        const completedSection = document.querySelector('#completedTasks .row');
+                        if (completedSection) {
+                            completedSection.appendChild(taskCard);
+                        }
+                    }
+                }, 300);
+            } else {
+                // Remove completed class
+                taskCard.classList.remove('completed-task');
+            }
+            
+            // In a real app, you would make an AJAX call to update the task status
+            console.log(`Task ${taskId} marked as ${isCompleted ? 'incomplete' : 'complete'}`);
+        });
+    });
+    
+    // Toggle completed tasks section
+    document.querySelector('.toggle-completed').addEventListener('click', function() {
+        const icon = this.querySelector('i');
+        if (icon.classList.contains('fa-eye-slash')) {
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        } else {
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        }
+    });
+    
+    // Filter functionality
+    document.querySelectorAll('.form-check-input').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const filterType = this.id.replace('filter-', '');
+            console.log(`Filter ${filterType} toggled to ${this.checked}`);
+            // In a real app, you would filter tasks based on selection
+        });
+    });
+    
+    // Today badge animation
+    document.querySelectorAll('.today-task').forEach(task => {
+        task.style.animation = 'pulse 3s infinite';
+    });
+    
+    // Sort functionality
+    document.querySelectorAll('.sortable-header').forEach(header => {
+        header.addEventListener('click', function() {
+            const sortType = this.getAttribute('data-sort');
+            console.log(`Sorting by ${sortType}`);
+            // In a real app, you would sort tasks
+        });
+    });
+    
+    // Initialize tooltips
+    document.querySelectorAll('[title]').forEach(el => {
+        new bootstrap.Tooltip(el);
+    });
+</script>
+{% endblock %}

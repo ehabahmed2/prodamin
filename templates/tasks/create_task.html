@@ -1,0 +1,384 @@
+{% extends 'base.html' %}
+
+{% block title %}إنشاء مهمة جديدة - Prodamin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .task-form-container {
+        background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .form-header {
+        background: linear-gradient(120deg, #4b6cb7, #182848);
+        color: white;
+        padding: 30px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .form-header::before {
+        content: "";
+        position: absolute;
+        top: -50px;
+        left: -50px;
+        width: 150px;
+        height: 150px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+    
+    .form-header::after {
+        content: "";
+        position: absolute;
+        bottom: -80px;
+        right: -60px;
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 50%;
+    }
+    
+    .slogan {
+        font-size: 1.4rem;
+        font-weight: 300;
+        opacity: 0.9;
+        margin-top: 10px;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .priority-indicator {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 8px;
+    }
+    
+    .priority-low { background-color: #28a745; }
+    .priority-medium { background-color: #ffc107; }
+    .priority-high { background-color: #dc3545; }
+    
+    .form-section {
+        padding: 30px;
+        position: relative;
+    }
+    
+    .form-control:focus {
+        box-shadow: 0 0 0 0.25rem rgba(75, 108, 183, 0.25);
+        border-color: #4b6cb7;
+    }
+    
+    .submit-btn {
+        background: linear-gradient(120deg, #4b6cb7, #182848);
+        border: none;
+        padding: 12px 30px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .submit-btn::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: 0.5s;
+    }
+    
+    .submit-btn:hover::after {
+        left: 100%;
+    }
+    
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(75, 108, 183, 0.4);
+    }
+    
+    .motivation-card {
+        background: linear-gradient(45deg, #fff8e1, #ffffff);
+        border-left: 4px solid #4b6cb7;
+        border-radius: 0 10px 10px 0;
+        padding: 20px;
+        margin: 25px 0;
+    }
+    
+    .floating-icon {
+        position: absolute;
+        opacity: 0.03;
+        font-size: 7rem;
+        z-index: 0;
+    }
+    
+    .icon-task { top: 20px; right: 20px; color: #4b6cb7; }
+    .icon-calendar { bottom: 30px; left: 30px; color: #28a745; }
+    .icon-priority { top: 150px; left: 40px; color: #dc3545; }
+    
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+    }
+    
+    .floating {
+        animation: float 4s ease-in-out infinite;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="task-form-container">
+                <!-- Header with Slogan -->
+                <div class="form-header text-center">
+                    <h1 class="display-5 mb-3">
+                        <i class="fas fa-plus-circle me-2"></i>
+                        إنشاء مهمة جديدة
+                    </h1>
+                    <p class="slogan">"لا تؤجل عمل اليوم إلى الغد، ابدأ الآن واصنع فرقًا"</p>
+                </div>
+                
+                <!-- Floating Icons -->
+                <i class="fas fa-tasks floating-icon icon-task floating"></i>
+                <i class="fas fa-calendar-alt floating-icon icon-calendar floating"></i>
+                <i class="fas fa-exclamation-triangle floating-icon icon-priority floating"></i>
+                
+                <!-- Task Form -->
+                <div class="form-section">
+                    <form method="post" id="taskForm">
+                        {% csrf_token %}
+
+                        
+
+                        
+                        <!-- Motivation Card -->
+                        <div class="motivation-card">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-lightbulb fa-2x text-warning me-3"></i>
+                                <div>
+                                    <h5 class="mb-1">نصيحة للإنتاجية</h5>
+                                    <p class="mb-0">قسّم مهامك الكبيرة إلى أجزاء صغيرة، فكل رحلة طويلة تبدأ بخطوة واحدة!</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% if form.errors %}
+                            <div class="alert alert-danger mt-3">
+                                <h6 class="alert-heading">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    حدث الأخطاء التالية:
+                                </h6>
+                                <ul class="mb-0 ps-3">
+                                    {% for field, errors in form.errors.items %}
+                                        {% for error in errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+
+                        <!-- Form Fields -->
+                        <div class="row">
+                            <div class="col-md-12 mb-4">
+                                <label for="id_title" class="form-label fw-bold">
+                                    <i class="fas fa-heading text-primary me-2"></i>
+                                    عنوان المهمة
+                                </label>
+                                {{ form.title }}
+                                <div class="form-text">اختر عنوانًا واضحًا يصف مهمتك بدقة</div>
+                            </div>
+                            
+                            <div class="col-md-12 mb-4">
+                                <label for="id_description" class="form-label fw-bold">
+                                    <i class="fas fa-align-left text-info me-2"></i>
+                                    تفاصيل المهمة
+                                </label>
+                                {{ form.description }}
+                                <div class="form-text">كلما كانت التفاصيل أوضح، كانت النتائج أفضل</div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-4">
+                                <label for="id_due_date" class="form-label fw-bold">
+                                    <i class="fas fa-calendar-day text-success me-2"></i>
+                                    تاريخ التسليم
+                                </label>
+                                {{ form.due_date }}
+                                <div class="form-text">حدد موعدًا نهائيًا لزيادة تركيزك</div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-flag text-danger me-2"></i>
+                                    مستوى الأهمية
+                                </label>
+                                {{ form.priority }}
+                                <div class="form-text">حدد أولوية المهمة حسب أهميتها</div>
+                            </div>
+                            
+                            <div class="col-md-12 mb-4">
+                                <div class="form-check form-switch">
+                                    {{ form.is_completed }}
+                                    <label class="form-check-label fw-bold" for="id_is_completed">
+                                        <i class="fas fa-check-circle text-success me-2"></i>
+                                        تم إكمال هذه المهمة
+                                    </label>
+                                </div>
+                                <div class="form-text">حدد هذا الخيار إذا كانت المهمة مكتملة بالفعل</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Progress Visualization -->
+                        <div class="progress-visual mb-4">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>تقدم المهمة</span>
+                                <span id="progress-value">0%</span>
+                            </div>
+                            <div class="progress" style="height: 12px;">
+                                <div id="progress-bar" class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-between mt-5">
+                            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                العودة للقائمة
+                            </a>
+                            <button type="submit" class="btn submit-btn text-white">
+                                <i class="fas fa-plus-circle me-2"></i>
+                                إنشاء المهمة
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Productivity Tips -->
+            <div class="row mt-4">
+                <div class="col-md-4 mb-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-hourglass-half fa-2x text-primary mb-3"></i>
+                            <h6>تقنية بومودورو</h6>
+                            <p class="small text-muted">اعمل لمدة 25 دقيقة ثم استرح 5 دقائق لزيادة تركيزك</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-bullseye fa-2x text-success mb-3"></i>
+                            <h6>التجزئة الذكية</h6>
+                            <p class="small text-muted">قسّم المهام الكبيرة إلى مهام صغيرة قابلة للإدارة</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-trophy fa-2x text-warning mb-3"></i>
+                            <h6>كافئ نفسك</h6>
+                            <p class="small text-muted">خصص مكافآت صغيرة عند إنجاز المهام الصعبة</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto focus on title field
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('id_title').focus();
+        
+        // Set default due date to tomorrow
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const formattedDate = tomorrow.toISOString().split('T')[0];
+        document.getElementById('id_due_date').value = formattedDate;
+    });
+
+    // Dynamic progress indicator
+    const formFields = document.querySelectorAll('#taskForm input, #taskForm textarea, #taskForm select');
+    const progressBar = document.getElementById('progress-bar');
+    const progressValue = document.getElementById('progress-value');
+    
+    formFields.forEach(field => {
+        field.addEventListener('input', updateProgress);
+    });
+    
+    function updateProgress() {
+        let completedFields = 0;
+        
+        formFields.forEach(field => {
+            if (field.type === 'checkbox') {
+                if (field.checked) completedFields++;
+            } else if (field.value.trim() !== '') {
+                completedFields++;
+            }
+        });
+        
+        // Title is required, so we have at least 1 field
+        const progress = (completedFields / formFields.length) * 100;
+        progressBar.style.width = `${progress}%`;
+        progressValue.textContent = `${Math.round(progress)}%`;
+        
+        // Change color based on progress
+        if (progress < 30) {
+            progressBar.className = 'progress-bar bg-danger';
+        } else if (progress < 70) {
+            progressBar.className = 'progress-bar bg-warning';
+        } else {
+            progressBar.className = 'progress-bar bg-success';
+        }
+    }
+    
+    // Initialize progress
+    updateProgress();
+
+    // Form submission animation
+    document.getElementById('taskForm').addEventListener('submit', function(e) {
+        const submitBtn = this.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> جاري إنشاء المهمة...';
+        
+        // Add a small delay to show the loading state
+        setTimeout(() => {
+            submitBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i> تم إنشاء المهمة!';
+        }, 1500);
+    });
+    
+    // Priority indicator
+    document.getElementById('id_priority').addEventListener('change', function() {
+        const options = this.querySelectorAll('option');
+        options.forEach(option => {
+            option.innerHTML = option.innerHTML.replace(/<span.*?<\/span>/, '');
+            if (option.value === this.value) {
+                let indicatorClass = 'priority-low';
+                if (option.value === '2') indicatorClass = 'priority-medium';
+                if (option.value === '3') indicatorClass = 'priority-high';
+                
+                option.innerHTML = `<span class="priority-indicator ${indicatorClass}"></span>${option.textContent}`;
+            }
+        });
+    });
+    
+    // Initialize priority indicator
+    document.getElementById('id_priority').dispatchEvent(new Event('change'));
+</script>
+{% endblock %}

@@ -27,7 +27,7 @@
                     <div class="d-flex align-items-center">
                         <div class="flex-grow-1">
                             <h5 class="card-title text-primary">إجمالي المهام</h5>
-                            <h2 class="mb-0">{{ total_tasks }}</h2>
+                            <h2 class="mb-0">{{ tasks.count }}</h2>
                         </div>
                         <i class="fas fa-tasks fa-2x text-primary"></i>
                     </div>
@@ -41,7 +41,7 @@
                     <div class="d-flex align-items-center">
                         <div class="flex-grow-1">
                             <h5 class="card-title text-success">المهام المُنجزة</h5>
-                            <h2 class="mb-0">{{ completed_tasks }}</h2>
+                            <h2 class="mb-0">{{ completed_tasks.count }}</h2>
                         </div>
                         <i class="fas fa-check-circle fa-2x text-success"></i>
                     </div>
@@ -55,7 +55,7 @@
                     <div class="d-flex align-items-center">
                         <div class="flex-grow-1">
                             <h5 class="card-title text-warning">المهام المعلقة</h5>
-                            <h2 class="mb-0">{{ pending_tasks }}</h2>
+                            <h2 class="mb-0">{{ pending_tasks.count }}</h2>
                         </div>
                         <i class="fas fa-clock fa-2x text-warning"></i>
                     </div>
@@ -126,7 +126,7 @@
                         <i class="fas fa-tasks text-primary"></i>
                         المهام الأخيرة
                     </h5>
-                    <a href="#" class="btn btn-sm btn-outline-primary">عرض الكل</a>
+                    <a href="{% url "all_tasks" %}" class="btn btn-sm btn-outline-primary">عرض الكل</a>
                 </div>
                 <div class="card-body">
                     {% if recent_tasks %}
@@ -159,7 +159,7 @@
                         <div class="text-center text-muted py-4">
                             <i class="fas fa-plus-circle fa-3x mb-3"></i>
                             <p>لا توجد مهام بعد</p>
-                            <a href="#" class="btn btn-primary">إنشاء مهمة جديدة</a>
+                            <a href="{% url "create_task" %}" class="btn btn-primary">إنشاء مهمة جديدة</a>
                         </div>
                     {% endif %}
                 </div>
@@ -195,7 +195,7 @@
                                                     </button>
                                                 {% else %}
                                                     <small class="text-muted">
-                                                        {% comment %} تحتاج {{ reward.points_value|sub:user_points.available_points }} نقطة {% endcomment %}
+                                                        تحتاج {{ reward.points_value }} نقطة
                                                     </small>
                                                 {% endif %}
                                             </div>
@@ -273,7 +273,7 @@
                 </div>
                 <div class="card-body">
                     <div class="d-flex flex-wrap gap-3">
-                        <a href="#" class="btn btn-primary">
+                        <a href="{% url "create_task" %}" class="btn btn-primary">
                             <i class="fas fa-plus"></i> إنشاء مهمة جديدة
                         </a>
                         <a href="#" class="btn btn-outline-primary">
