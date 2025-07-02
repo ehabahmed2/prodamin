@@ -1,0 +1,358 @@
+{% extends 'base.html' %}
+
+{% block title %}إنشاء حساب جديد - Prodamin{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow border-0">
+                <div class="card-body p-5">
+                    <!-- Header -->
+                    <div class="text-center mb-4">
+                        <i class="fas fa-tree fa-3x text-primary mb-3"></i>
+                        <h2 class="card-title">ابدأ رحلة الإنجاز!</h2>
+                        <p class="text-muted">أنشئ حسابك المجاني واحصل على 100 نقطة ترحيبية</p>
+                    </div>
+
+                    <!-- Registration Form -->
+                    <form method="post" action="{% url 'register' %}" id="registrationForm">
+                        {% csrf_token %}
+                            <div>
+                                <i class="fas fa-info-circle text-muted"></i>
+                                <small class="text-muted">
+                                    جميع الحقول المطلوبة *
+                                </small>
+                                
+                                <!-- Styled Form Errors -->
+                                {% if form.errors %}
+                                    <div class="alert alert-danger mt-3">
+                                        <h6 class="alert-heading">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>
+                                            حدث الأخطاء التالية:
+                                        </h6>
+                                        <ul class="mb-0 ps-3">
+                                            {% for field, errors in form.errors.items %}
+                                                {% for error in errors %}
+                                                    <li>{{ error }}</li>
+                                                {% endfor %}
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="first_name" class="form-label">
+                                    <i class="fas fa-user text-primary"></i>
+                                    الاسم الأول
+                                </label>
+                                {{ form.first_name }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="last_name" class="form-label">
+                                    <i class="fas fa-user text-primary"></i>
+                                    الاسم الأخير
+                                </label>
+                                {{ form.last_name }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="username" class="form-label">
+                                <i class="fas fa-at text-primary"></i>
+                                اسم المستخدم *
+                            </label>
+                            {{ form.username }}
+                            <div class="form-text">
+                                <i class="fas fa-info-circle"></i>
+                                يجب أن يكون فريداً ولا يحتوي على مسافات
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">
+                                <i class="fas fa-envelope text-primary"></i>
+                                البريد الإلكتروني *
+                            </label>
+                            {{ form.email }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password1" class="form-label">
+                                <i class="fas fa-lock text-primary"></i>
+                                كلمة المرور *
+                            </label>
+                            <div class="input-group">
+                                {{ form.password1 }}
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword1">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle"></i>
+                                يجب أن تكون 8 أحرف على الأقل وتحتوي على أرقام وحروف
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password2" class="form-label">
+                                <i class="fas fa-lock text-primary"></i>
+                                تأكيد كلمة المرور *
+                            </label>
+                            <div class="input-group">
+                                {{ form.password2 }}
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword2">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div id="passwordMatch" class="form-text"></div>
+                        </div>
+
+                        <!-- Password Strength Indicator -->
+                        <div class="mb-3">
+                            <div class="password-strength">
+                                <label class="form-label small">قوة كلمة المرور:</label>
+                                <div class="progress" style="height: 8px;">
+                                    <div id="passwordStrength" class="progress-bar" 
+                                         style="width: 0%"></div>
+                                </div>
+                                <small id="strengthText" class="text-muted"></small>
+                            </div>
+                        </div>
+
+                        <!-- Terms and Privacy -->
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" 
+                                       id="agreeTerms" required>
+                                <label class="form-check-label small" for="agreeTerms">
+                                    أوافق على 
+                                    <a href="#" target="_blank" class="text-decoration-none">
+                                        شروط الخدمة
+                                    </a>
+                                    و
+                                    <a href="#" target="_blank" class="text-decoration-none">
+                                        سياسة الخصوصية
+                                    </a>
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100 mb-3" 
+                                id="submitBtn" disabled>
+                            <i class="fas fa-user-plus"></i>
+                            إنشاء حساب جديد
+                        </button>
+                    </form>
+
+                    <!-- Divider -->
+                    <div class="text-center mb-3">
+                        <span class="text-muted">أو</span>
+                    </div>
+
+                    <!-- Social Registration (Future Feature) -->
+                    <div class="d-grid gap-2 mb-4">
+                        <button class="btn btn-outline-primary disabled" disabled>
+                            <i class="fab fa-google"></i>
+                            التسجيل بـ Google
+                            <small class="text-muted">(قريباً)</small>
+                        </button>
+                    </div>
+
+                    <!-- Login Link -->
+                    <div class="text-center">
+                        <p class="mb-0">
+                            لديك حساب بالفعل؟ 
+                            <a href="{% url 'login' %}" class="text-decoration-none fw-bold">
+                                تسجيل الدخول
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Benefits Section -->
+            <div class="card mt-4 border-0 bg-light">
+                <div class="card-body p-4">
+                    <h6 class="card-title text-center mb-3">
+                        <i class="fas fa-gift text-accent"></i>
+                        ماذا ستحصل عند التسجيل؟
+                    </h6>
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <i class="fas fa-coins fa-2x text-accent mb-2"></i>
+                            <p class="small mb-0">100 نقطة ترحيبية</p>
+                        </div>
+                        <div class="col-4">
+                            <i class="fas fa-brain fa-2x text-primary mb-2"></i>
+                            <p class="small mb-0">مكافآت ذكية</p>
+                        </div>
+                        <div class="col-4">
+                            <i class="fas fa-chart-line fa-2x text-success mb-2"></i>
+                            <p class="small mb-0">تحليلات مفصلة</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Password visibility toggles
+    function setupPasswordToggle(inputId, buttonId) {
+        document.getElementById(buttonId).addEventListener('click', function() {
+            const passwordField = document.getElementById(inputId);
+            const toggleIcon = this.querySelector('i');
+            
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordField.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        });
+    }
+    
+    setupPasswordToggle('password1', 'togglePassword1');
+    setupPasswordToggle('password2', 'togglePassword2');
+
+    // Password strength checker
+    document.getElementById('password1').addEventListener('input', function() {
+        const password = this.value;
+        const strengthBar = document.getElementById('passwordStrength');
+        const strengthText = document.getElementById('strengthText');
+        
+        let strength = 0;
+        let text = '';
+        let color = '';
+        
+        if (password.length >= 8) strength += 25;
+        if (/[a-z]/.test(password)) strength += 25;
+        if (/[A-Z]/.test(password)) strength += 25;
+        if (/[0-9]/.test(password)) strength += 25;
+        
+        if (strength <= 25) {
+            text = 'ضعيفة';
+            color = 'bg-danger';
+        } else if (strength <= 50) {
+            text = 'متوسطة';
+            color = 'bg-warning';
+        } else if (strength <= 75) {
+            text = 'جيدة';
+            color = 'bg-info';
+        } else {
+            text = 'قوية';
+            color = 'bg-success';
+        }
+        
+        strengthBar.style.width = strength + '%';
+        strengthBar.className = 'progress-bar ' + color;
+        strengthText.textContent = text;
+        
+        checkFormValidity();
+    });
+
+    // Password match checker
+    function checkPasswordMatch() {
+        const password1 = document.getElementById('password1').value;
+        const password2 = document.getElementById('password2').value;
+        const matchText = document.getElementById('passwordMatch');
+        
+        if (password2.length > 0) {
+            if (password1 === password2) {
+                matchText.innerHTML = '<i class="fas fa-check text-success"></i> كلمات المرور متطابقة';
+                matchText.className = 'form-text text-success';
+            } else {
+                matchText.innerHTML = '<i class="fas fa-times text-danger"></i> كلمات المرور غير متطابقة';
+                matchText.className = 'form-text text-danger';
+            }
+        } else {
+            matchText.innerHTML = '';
+        }
+        
+        checkFormValidity();
+    }
+    
+    document.getElementById('password2').addEventListener('input', checkPasswordMatch);
+
+    // Form validity checker
+    function checkFormValidity() {
+        const username = document.getElementById('username').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const password1 = document.getElementById('password1').value;
+        const password2 = document.getElementById('password2').value;
+        const agreeTerms = document.getElementById('agreeTerms').checked;
+        const submitBtn = document.getElementById('submitBtn');
+        
+        const isValid = username.length >= 3 && 
+                       email.length > 0 && 
+                       password1.length >= 8 && 
+                       password1 === password2 && 
+                       agreeTerms;
+        
+        submitBtn.disabled = !isValid;
+    }
+
+    // Add event listeners for form validation
+    ['username', 'email', 'password1', 'password2'].forEach(id => {
+        document.getElementById(id).addEventListener('input', checkFormValidity);
+    });
+    
+    document.getElementById('agreeTerms').addEventListener('change', checkFormValidity);
+
+    // Form submission validation
+    document.getElementById('registrationForm').addEventListener('submit', function(e) {
+        const password1 = document.getElementById('password1').value;
+        const password2 = document.getElementById('password2').value;
+        const username = document.getElementById('username').value.trim();
+        const email = document.getElementById('email').value.trim();
+        
+        // Check password match
+        if (password1 !== password2) {
+            e.preventDefault();
+            alert('كلمات المرور غير متطابقة!');
+            return false;
+        }
+        
+        // Check password strength
+        if (password1.length < 8) {
+            e.preventDefault();
+            alert('كلمة المرور يجب أن تكون 8 أحرف على الأقل!');
+            return false;
+        }
+        
+        // Check username
+        if (username.length < 3) {
+            e.preventDefault();
+            alert('اسم المستخدم يجب أن يكون 3 أحرف على الأقل!');
+            return false;
+        }
+        
+        // Check email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            e.preventDefault();
+            alert('البريد الإلكتروني غير صحيح!');
+            return false;
+        }
+        
+        // Show loading state
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري إنشاء الحساب...';
+    });
+
+    // Auto-focus on first name field
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('first_name').focus();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% load static %}
+<nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="{% url "main" %}">
+            <img src="{% static 'images/prodamin-logo.png' %}" alt="Prodamin Logo" style="height: 35px; width: 35px; margin-left: 10px;">
+            <span style="font-weight: 800; font-size: 1.8rem;">Prodamin</span>
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <i class="fas fa-home"></i> الرئيسية
+                    </a>
+                </li>
+                
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-tachometer-alt"></i> لوحة التحكم
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-tasks"></i> المهام
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-gift"></i> المكافآت
+                        </a>
+                    </li>
+                {% endif %}
+                
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <i class="fas fa-info-circle"></i> عنا
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <i class="fas fa-envelope"></i> تواصل معنا
+                    </a>
+                </li>
+            </ul>
+            
+            <ul class="navbar-nav">
+                {% if user.is_authenticated %}
+                    <!-- نقاط المستخدم -->
+                    <li class="nav-item">
+                        <span class="navbar-text d-flex align-items-center">
+                            <i class="fas fa-coins text-accent"></i>
+                            <span class='m-1' id="user-points">{{ user.userpoints.available_points|default:0 }}</span> نقطة
+                        </span>
+                    </li>
+                    
+                    <!-- قائمة المستخدم -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" style="padding-top: 12px;" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle"></i>
+                            {{ user.first_name|default:user.username }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">
+                                <i class="fas fa-user"></i> الملف الشخصي
+                            </a></li>
+                            <li><a class="dropdown-item" href="#">
+                                <i class="fas fa-chart-line"></i> الإحصائيات
+                            </a></li>
+                            <li><a class="dropdown-item" href="#">
+                                <i class="fas fa-bullseye"></i> أهدافي
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url "logout" %}">
+                                <i class="fas fa-sign-out-alt"></i> تسجيل خروج
+                            </a></li>
+                        </ul>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url "login" %}">
+                            <i class="fas fa-sign-in-alt"></i> تسجيل دخول
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-primary ms-2" href="{% url "register" %}">
+                            <i class="fas fa-user-plus"></i> إنشاء حساب
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
