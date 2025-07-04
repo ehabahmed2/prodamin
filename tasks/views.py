@@ -4,6 +4,9 @@ from .forms import TaskForm
 from django.shortcuts import redirect
 from django.contrib import messages
 from .models import Task
+from django.utils import timezone
+from datetime import timedelta
+
 
 # Create your views here.
 
@@ -43,4 +46,55 @@ def create_task(request):
 
 @login_required
 def all_tasks(request):
-    return render(request, 'tasks/all_tasks.html', context={})  
+    # get all tasks
+    tasks = Task.objects.filter(user=request.user)
+
+    completed = request.GET.get('completed')
+    pending = request.GET.get('pending')
+
+    # Only show tasks if a filter is selected
+    if completed and not pending:
+        tasks = tasks.filter(is_completed=True)
+    elif pending and not completed:
+        tasks = tasks.filter(is_completed=False)
+    # if user selected both
+    elif pending and completed:
+        pass
+    
+    # if didn't pick anything then show nothign
+    else:
+        tasks = None
+
+    # check if user selected somethig, and proceed with the filtering
+    if tasks is not None:
+        total_tasks = tasks.count()
+        completed_tasks = tasks.filter(is_completed=True)
+        completion_rate = (completed_tasks.count() / total_tasks) * 100 if total_tasks > 0 else 0
+
+        now = timezone.now()
+        month_ago = now - timedelta(days=30)
+        tasks_last_month = tasks.filter(created_at__gte=month_ago)
+        completed_last_month = tasks_last_month.filter(is_completed=True).count()
+        complete_month_rate = (completed_last_month / tasks_last_month.count()) * 100 if tasks_last_month.count() > 0 else 0
+
+        today = timezone.now().date()
+        today_tasks = tasks.filter(due_date=today)
+        upcoming_tasks = tasks.filter(due_date__gt=today)
+        overdue_tasks = tasks.filter(due_date__lt=today)
+
+        context = {
+            'total_tasks': total_tasks,
+            'completed_tasks': completed_tasks,
+            'completion_rate': completion_rate,
+            'tasks_last_month': tasks_last_month,
+            'complete_month_rate': complete_month_rate,
+            'completed_last_month': completed_last_month,
+            'today_tasks': today_tasks,
+            'upcoming_tasks': upcoming_tasks,
+            'overdue_tasks': overdue_tasks,
+        }
+    # if selected nothing, return empty context
+    else:
+        context = {}
+
+    return render(request, 'tasks/all_tasks.html', context=context)

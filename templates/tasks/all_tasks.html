@@ -215,7 +215,7 @@
                             <div class="d-flex align-items-center">
                                 <i class="fas fa-check-circle fa-2x me-3"></i>
                                 <div>
-                                    <h4 class="mb-0">{{ completed_tasks }} مكتملة</h4>
+                                    <h4 class="mb-0">{{ completed_tasks.count }} مكتملة</h4>
                                     <small class="opacity-75">معدل إنجاز {{ completion_rate }}%</small>
                                 </div>
                             </div>
@@ -229,101 +229,96 @@
         <div class="p-4">
             <div class="row">
                 <!-- Filters Column -->
+
                 <div class="col-lg-3 mb-4">
-                    <div class="filter-card p-3 mb-4">
-                        <h5 class="mb-3">
-                            <i class="fas fa-filter me-2 text-primary"></i>
-                            تصفية المهام
-                        </h5>
+                    <form method="get" id="task-filter-form">
                         
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">حالة المهمة</label>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" id="filter-completed" checked>
-                                <label class="form-check-label" for="filter-completed">
-                                    المهام المكتملة
-                                </label>
+                        <div class="filter-card p-3 mb-4">
+                            <h5 class="mb-3">
+                                <i class="fas fa-filter me-2 text-primary"></i>
+                                تصفية المهام
+                            </h5>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">حالة المهمة</label>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="completed" id="filter-completed" {% if request.GET.completed %}checked{% endif %}>
+                                    <label class="form-check-label" for="filter-completed">
+                                        المهام المكتملة
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="pending" id="filter-pending" {% if request.GET.pending %}checked{% endif %}>
+                                    <label class="form-check-label" for="filter-pending">
+                                        المهام المعلقة
+                                    </label>
+                                </div>
                             </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" id="filter-pending" checked>
-                                <label class="form-check-label" for="filter-pending">
-                                    المهام المعلقة
-                                </label>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">مستوى الأهمية</label>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="filter-high" checked>
+                                    <label class="form-check-label" for="filter-high">
+                                        <span class="priority-indicator bg-danger"></span>
+                                        عالي
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="filter-medium" checked>
+                                    <label class="form-check-label" for="filter-medium">
+                                        <span class="priority-indicator bg-warning"></span>
+                                        متوسط
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="filter-low" checked>
+                                    <label class="form-check-label" for="filter-low">
+                                        <span class="priority-indicator bg-success"></span>
+                                        منخفض
+                                    </label>
+                                </div>
                             </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="filter-overdue" checked>
-                                <label class="form-check-label" for="filter-overdue">
-                                    المهام المتأخرة
-                                </label>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">نطاق التاريخ</label>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="filter-today" checked>
+                                    <label class="form-check-label" for="filter-today">
+                                        مهام اليوم
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="filter-upcoming" checked>
+                                    <label class="form-check-label" for="filter-upcoming">
+                                        المهام القادمة
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="filter-no-date" checked>
+                                    <label class="form-check-label" for="filter-no-date">
+                                        بدون تاريخ
+                                    </label>
+                                </div>
                             </div>
+                            
+                            <button class="btn btn-primary w-100">
+                                <i class="fas fa-sync-alt me-2"></i>
+                                تطبيق الفلتر
+                            </button>
                         </div>
                         
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">مستوى الأهمية</label>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" id="filter-high" checked>
-                                <label class="form-check-label" for="filter-high">
-                                    <span class="priority-indicator bg-danger"></span>
-                                    عالي
-                                </label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" id="filter-medium" checked>
-                                <label class="form-check-label" for="filter-medium">
-                                    <span class="priority-indicator bg-warning"></span>
-                                    متوسط
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="filter-low" checked>
-                                <label class="form-check-label" for="filter-low">
-                                    <span class="priority-indicator bg-success"></span>
-                                    منخفض
-                                </label>
-                            </div>
+                        <div class="filter-card p-3">
+                            <h5 class="mb-3">
+                                <i class="fas fa-plus-circle me-2 text-success"></i>
+                                إضافة سريعة
+                            </h5>
+                            <a href="{% url 'create_task' %}" class="btn btn-success w-100 mb-3">
+                                <i class="fas fa-plus me-2"></i>
+                                مهمة جديدة
+                            </a>
                         </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">نطاق التاريخ</label>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" id="filter-today" checked>
-                                <label class="form-check-label" for="filter-today">
-                                    مهام اليوم
-                                </label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" id="filter-upcoming" checked>
-                                <label class="form-check-label" for="filter-upcoming">
-                                    المهام القادمة
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="filter-no-date" checked>
-                                <label class="form-check-label" for="filter-no-date">
-                                    بدون تاريخ
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <button class="btn btn-primary w-100">
-                            <i class="fas fa-sync-alt me-2"></i>
-                            تطبيق الفلتر
-                        </button>
-                    </div>
-                    
-                    <div class="filter-card p-3">
-                        <h5 class="mb-3">
-                            <i class="fas fa-plus-circle me-2 text-success"></i>
-                            إضافة سريعة
-                        </h5>
-                        <a href="{% url 'create_task' %}" class="btn btn-success w-100 mb-3">
-                            <i class="fas fa-plus me-2"></i>
-                            مهمة جديدة
-                        </a>
-                        <p class="small text-muted text-center">
-                            أو استخدم الاختصار <kbd>Ctrl</kbd> + <kbd>N</kbd>
-                        </p>
-                    </div>
+                    </form>
                 </div>
                 
                 <!-- Tasks Column -->
@@ -372,14 +367,13 @@
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h6 class="mb-0">تقدم المهام الشهري</h6>
-                                <span class="badge bg-primary">75% إنجاز</span>
+                                <span class="badge bg-primary">{{complete_month_rate}}% إنجاز</span>
                             </div>
                             <div class="progress progress-xs mb-1">
-                                <div class="progress-bar bg-success" role="progressbar" style="width: 75%"></div>
+                                <div class="progress-bar bg-success" role="progressbar" style="width: {{completion_rate}}%"></div>
                             </div>
                             <div class="d-flex justify-content-between small text-muted">
-                                <span>22/30 مهمة</span>
-                                <span>5 أيام متبقية</span>
+                                <span>{{ completed_last_month }}/{{ tasks_last_month.count }} مهمة</span>
                             </div>
                         </div>
                     </div>
@@ -403,7 +397,7 @@
                         <div class="row g-3">
                             {% for task in today_tasks %}
                             <div class="col-md-6">
-                                <div class="task-card p-3 {% if task.due_date < today %}overdue-task{% else %}today-task{% endif %} priority-{{ task.get_priority_display|lower }}">
+                                <div class="task-card p-3">
                                     <div class="task-actions">
                                         <button class="btn btn-sm btn-light me-1" title="تعديل">
                                             <i class="fas fa-edit text-primary"></i>
@@ -422,7 +416,7 @@
                                             
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <div>
-                                                    <span class="badge bg-{% if task.due_date < today %}overdue{% else %}today{% endif %} me-2">
+                                                    <span class="badge me-2">
                                                         <i class="fas fa-calendar me-1"></i>
                                                         {{ task.due_date|date:"d M" }}
                                                     </span>
@@ -475,7 +469,7 @@
                         <div class="row g-3">
                             {% for task in upcoming_tasks %}
                             <div class="col-md-4">
-                                <div class="task-card p-3 priority-{{ task.get_priority_display|lower }}">
+                                <div class="task-card p-3">
                                     <div class="task-actions">
                                         <button class="btn btn-sm btn-light me-1" title="تعديل">
                                             <i class="fas fa-edit text-primary"></i>
@@ -630,12 +624,6 @@
                                                     <span class="badge bg-{% if task.priority == 3 %}danger{% elif task.priority == 2 %}warning{% else %}success{% endif %}">
                                                         {% if task.priority == 3 %}عالي{% elif task.priority == 2 %}متوسط{% else %}منخفض{% endif %}
                                                     </span>
-                                                </div>
-                                                <div>
-                                                    <button class="btn btn-sm btn-outline-danger">
-                                                        <i class="fas fa-bolt me-1"></i>
-                                                        إكمال عاجل
-                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
