@@ -157,7 +157,6 @@ def all_tasks(request):
     return render(request, 'tasks/all_tasks.html', context=context)
 
 
-from django.shortcuts import get_object_or_404
 
 @login_required
 def update_task(request, pk):
@@ -173,3 +172,17 @@ def update_task(request, pk):
     else:
         form = TaskForm(instance=task)
     return render(request, 'tasks/create_task.html', {'form': form, 'task': task})
+
+
+# delete task
+@login_required
+def delete_task(request, pk):
+    if request.method == 'POST':
+        task = get_object_or_404(Task, pk=pk, user=request.user)
+        task.delete()
+        messages.success(request, 'Task deleted successfully!')
+        return redirect('all_tasks')
+
+
+
+
