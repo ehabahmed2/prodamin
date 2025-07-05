@@ -233,6 +233,16 @@
                 <div class="col-lg-3 mb-4">
                     <form method="get" id="task-filter-form">
                         
+                        <div class="d-flex mb-3">
+                            
+                            <div class="input-group" style="width: 250px;">
+                                    <input type="text" name='search' class="form-control" placeholder="ابحث في المهام...">
+                                    <button class="btn btn-primary" type="submit">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                            </div>
+                        </div>
+
                         <div class="filter-card p-3 mb-4">
                             <h5 class="mb-3">
                                 <i class="fas fa-filter me-2 text-primary"></i>
@@ -242,15 +252,24 @@
                             <div class="mb-3">
                                 <label class="form-label fw-bold">حالة المهمة</label>
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="completed" id="filter-completed" {% if request.GET.completed %}checked{% endif %}>
+                                    <input class="form-check-input" type="checkbox" name="completed" id="filter-completed" 
+                                    {% if request.GET.completed or not request.GET %}checked{% endif %}>                                    
                                     <label class="form-check-label" for="filter-completed">
                                         المهام المكتملة
                                     </label>
                                 </div>
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="pending" id="filter-pending" {% if request.GET.pending %}checked{% endif %}>
+                                    <input class="form-check-input" type="checkbox" name="pending" id="filter-pending" 
+                                    {% if request.GET.pending or not request.GET %}checked{% endif %}>
                                     <label class="form-check-label" for="filter-pending">
                                         المهام المعلقة
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="late" id="filter-pending" 
+                                    {% if request.GET.pending or not request.GET %}checked{% endif %}>
+                                    <label class="form-check-label" for="filter-pending">
+                                        المهام المتأخره
                                     </label>
                                 </div>
                             </div>
@@ -258,21 +277,24 @@
                             <div class="mb-3">
                                 <label class="form-label fw-bold">مستوى الأهمية</label>
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="filter-high" checked>
+                                    <input class="form-check-input" name='high' type="checkbox" id="filter-high" 
+                                    {% if request.GET.high or not request.GET %}checked{% endif %}>
                                     <label class="form-check-label" for="filter-high">
                                         <span class="priority-indicator bg-danger"></span>
                                         عالي
                                     </label>
                                 </div>
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="filter-medium" checked>
+                                    <input class="form-check-input" name='medium' type="checkbox" id="filter-medium" 
+                                    {% if request.GET.medium or not request.GET %}checked{% endif %}>
                                     <label class="form-check-label" for="filter-medium">
                                         <span class="priority-indicator bg-warning"></span>
                                         متوسط
                                     </label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="filter-low" checked>
+                                    <input class="form-check-input" name='low' type="checkbox" id="filter-low" 
+                                    {% if request.GET.low or not request.GET %}checked{% endif %}>
                                     <label class="form-check-label" for="filter-low">
                                         <span class="priority-indicator bg-success"></span>
                                         منخفض
@@ -283,19 +305,22 @@
                             <div class="mb-3">
                                 <label class="form-label fw-bold">نطاق التاريخ</label>
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="filter-today" checked>
+                                    <input class="form-check-input" name='today' type="checkbox" id="filter-today" 
+                                    {% if request.GET.today or not request.GET %}checked{% endif %}>
                                     <label class="form-check-label" for="filter-today">
                                         مهام اليوم
                                     </label>
                                 </div>
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="filter-upcoming" checked>
+                                    <input class="form-check-input" name='upcoming' type="checkbox" id="filter-upcoming" 
+                                    {% if request.GET.upcoming or not request.GET %}checked{% endif %}>
                                     <label class="form-check-label" for="filter-upcoming">
                                         المهام القادمة
                                     </label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="filter-no-date" checked>
+                                    <input class="form-check-input" name='no_date' type="checkbox" id="filter-no-date" 
+                                    {% if request.GET.no_date or not request.GET %}checked{% endif %}>
                                     <label class="form-check-label" for="filter-no-date">
                                         بدون تاريخ
                                     </label>
@@ -306,6 +331,9 @@
                                 <i class="fas fa-sync-alt me-2"></i>
                                 تطبيق الفلتر
                             </button>
+                            
+                            <a href="{% url 'all_tasks' %}" class="btn btn-primary w-100 mt-3">إعادة تعيين</a>
+
                         </div>
                         
                         <div class="filter-card p-3">
@@ -325,27 +353,6 @@
                 <div class="col-lg-9">
                     <!-- Task Controls -->
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <div class="d-flex">
-                            <div class="dropdown me-2">
-                                <button class="btn btn-outline-primary dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown">
-                                    <i class="fas fa-sort me-2"></i>
-                                    ترتيب حسب: التاريخ
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#">التاريخ (الأقدم أولاً)</a></li>
-                                    <li><a class="dropdown-item" href="#">التاريخ (الأحدث أولاً)</a></li>
-                                    <li><a class="dropdown-item" href="#">الأهمية (من أعلى إلى أقل)</a></li>
-                                    <li><a class="dropdown-item" href="#">الأهمية (من أقل إلى أعلى)</a></li>
-                                </ul>
-                            </div>
-                            
-                            <div class="input-group" style="width: 250px;">
-                                <input type="text" class="form-control" placeholder="ابحث في المهام...">
-                                <button class="btn btn-primary" type="button">
-                                    <i class="fas fa-search"></i>
-                                </button>
-                            </div>
-                        </div>
                         
                         <div>
                             <div class="btn-group" role="group">
