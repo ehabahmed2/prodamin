@@ -1,7 +1,5 @@
 {% extends 'base.html' %}
-
-{% block title %}إنشاء مهمة جديدة - Prodamin{% endblock %}
-
+{% block title %}تعديل/انشاء مهمة جديدة - Prodamin{% endblock %}
 {% block extra_css %}
 <style>
     .task-form-container {
@@ -142,10 +140,19 @@
             <div class="task-form-container">
                 <!-- Header with Slogan -->
                 <div class="form-header text-center">
+                    {% if task %}
+                    <h1 class="display-5 mb-3">
+                        <i class="fas fa-plus-circle me-2"></i>
+                        تعديل المهمة
+                    </h1>
+                    {% else %}
+
                     <h1 class="display-5 mb-3">
                         <i class="fas fa-plus-circle me-2"></i>
                         إنشاء مهمة جديدة
                     </h1>
+                    {% endif %}
+
                     <p class="slogan">"لا تؤجل عمل اليوم إلى الغد، ابدأ الآن واصنع فرقًا"</p>
                 </div>
                 
@@ -256,10 +263,17 @@
                                 <i class="fas fa-arrow-left me-2"></i>
                                 العودة للقائمة
                             </a>
-                            <button type="submit" class="btn submit-btn text-white">
-                                <i class="fas fa-plus-circle me-2"></i>
-                                إنشاء المهمة
-                            </button>
+                            {% if task %}
+                                <button type="submit" class="btn submit-btn text-white">
+                                    <i class="fas fa-plus-circle me-2"></i>
+                                    تعديلس المهمة
+                                </button>
+                            {% else %}
+                                <button type="submit" class="btn submit-btn text-white">
+                                    <i class="fas fa-plus-circle me-2"></i>
+                                    إنشاء المهمة
+                                </button>
+                            {% endif %}
                         </div>
                     </form>
                 </div>

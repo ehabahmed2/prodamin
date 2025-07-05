@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .forms import TaskForm
 from django.shortcuts import redirect
@@ -136,6 +136,7 @@ def all_tasks(request):
         upcoming_tasks = tasks.filter(due_date__gt=today)
         overdue_tasks = tasks.filter(due_date__lt=today)
 
+        no_date_tasks = tasks.filter(due_date=None)
         
         context = {
             'total_tasks': total_tasks,
@@ -147,6 +148,7 @@ def all_tasks(request):
             'today_tasks': today_tasks,
             'upcoming_tasks': upcoming_tasks,
             'overdue_tasks': overdue_tasks,
+            'no_date_tasks': no_date_tasks,
         }
     # if selected nothing, return empty context
     else:
@@ -154,3 +156,20 @@ def all_tasks(request):
 
     return render(request, 'tasks/all_tasks.html', context=context)
 
+
+from django.shortcuts import get_object_or_404
+
+@login_required
+def update_task(request, pk):
+    task = get_object_or_404(Task, pk=pk, user=request.user)
+    if request.method == 'POST':
+        form = TaskForm(request.POST, instance=task)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'تم تحديث المهمة بنجاح')
+            return redirect('all_tasks')
+        else:
+            messages.warning(request, 'حدث خطأ أثناء تعديل المهمة. يرجى التحقق من البيانات المدخلة.')
+    else:
+        form = TaskForm(instance=task)
+    return render(request, 'tasks/create_task.html', {'form': form, 'task': task})
