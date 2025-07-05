@@ -12,10 +12,10 @@
         position: relative;
     }
     
-    .dashboard-header {
+        .dashboard-header {
         background: linear-gradient(120deg, #4b6cb7, #182848);
         color: white;
-        padding: 25px 30px;
+        padding: 20px;
         position: relative;
     }
     
@@ -24,19 +24,145 @@
         position: absolute;
         top: 0;
         right: 0;
-        width: 200px;
+        width: 100%;
         height: 100%;
         background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23ffffff' fill-opacity='0.1' d='M0,128L48,117.3C96,107,192,85,288,101.3C384,117,480,171,576,186.7C672,203,768,181,864,160C960,139,1056,117,1152,128C1248,139,1344,181,1392,202.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
         background-size: cover;
-        opacity: 0.2;
+        opacity: 0.15;
+    }
+    
+    .header-content {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .header-row {
+        display: flex;
+        flex-wrap: wrap;
+        margin: 0 -10px;
+    }
+    
+    .header-col {
+        padding: 10px;
+        flex: 1;
+    }
+    
+    .text-section h1 {
+        font-size: 1.8rem;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .text-section h1 i {
+        margin-left: 12px;
+    }
+    
+    .text-section p.lead {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        line-height: 1.5;
+        text-align: center;
+    }
+    
+    .counters-section {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
     }
     
     .task-counter {
         background: rgba(255, 255, 255, 0.15);
-        border-radius: 10px;
-        padding: 12px 20px;
-        backdrop-filter: blur(5px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        padding: 15px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        min-width: 180px;
+        margin: 0 10px 10px;
+        transition: transform 0.3s ease, background 0.3s ease;
+    }
+    
+    .task-counter:hover {
+        transform: translateY(-5px);
+        background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .task-counter .d-flex {
+        display: flex;
+        align-items: center;
+    }
+    
+    .task-counter i {
+        font-size: 1.8rem;
+        margin-left: 15px;
+    }
+    
+    .task-counter h4 {
+        font-size: 1.3rem;
+        margin-bottom: 5px;
+    }
+    
+    .task-counter small {
+        font-size: 0.85rem;
+        opacity: 0.8;
+    }
+    
+    /* Responsive adjustments */
+    @media (min-width: 768px) {
+        .dashboard-header {
+            padding: 25px 30px;
+        }
+        
+        .text-section h1 {
+            font-size: 2.2rem;
+            justify-content: flex-start;
+        }
+        
+        .text-section p.lead {
+            text-align: left;
+        }
+        
+        .counters-section {
+            justify-content: flex-end;
+            margin-top: 0;
+        }
+        
+        .task-counter {
+            min-width: 200px;
+            margin: 0 0 0 15px;
+        }
+    }
+    
+    @media (max-width: 767px) {
+        .counters-section {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .task-counter {
+            width: 100%;
+            max-width: 280px;
+            margin: 0 0 15px 0;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .text-section h1 {
+            font-size: 1.6rem;
+        }
+        
+        .text-section p.lead {
+            font-size: 1rem;
+        }
+        
+        .task-counter {
+            padding: 12px;
+        }
+        
+        .task-counter h4 {
+            font-size: 1.2rem;
+        }
     }
     
     .task-card {
@@ -46,6 +172,8 @@
         overflow: hidden;
         position: relative;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        padding: 15px !important;
+
     }
     
     .task-card:hover {
@@ -96,6 +224,8 @@
         left: 10px;
         opacity: 0;
         transition: opacity 0.3s ease;
+        z-index: 10;
+
     }
     
     .task-card:hover .task-actions {
@@ -184,6 +314,87 @@
         display: inline-block;
         margin-right: 5px;
     }
+    
+    /* Always show actions on small screens */
+    @media (max-width: 767px) {
+        .task-actions {
+            opacity: 1 !important;
+            top: 5px;
+            left: 5px;
+        }
+        
+        .task-actions .btn {
+            width: 28px;
+            height: 28px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 4px;
+        }
+        
+        .task-actions .btn i {
+            font-size: 0.8rem;
+        }
+    }
+
+    /* Adjust content layout for small screens */
+    @media (max-width: 767px) {
+        .task-card .d-flex {
+            padding-top: 25px; /* Space for buttons */
+        }
+        
+        .task-card h5 {
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+        
+        .task-card .text-muted.small {
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+        }
+        
+        .task-card .align-items-start {
+            flex-direction: column;
+        }
+        
+        .task-card .task-checkbox {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            margin-right: 0;
+        }
+        
+        .task-card .d-flex.justify-content-between {
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .task-card .d-flex.justify-content-between > div {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .task-card .badge {
+            font-size: 0.75rem;
+            padding: 0.35em 0.6em;
+        }
+    }
+
+    /* For very small screens (e.g. iPhone 5/SE) */
+    @media (max-width: 374px) {
+        .task-card .d-flex.justify-content-between > div {
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .task-card .badge {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 3px;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -192,31 +403,35 @@
     <div class="task-management-container">
         <!-- Dashboard Header -->
         <div class="dashboard-header">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <h1 class="display-6 mb-3">
-                        <i class="fas fa-tasks me-2"></i>
-                        لوحة إدارة المهام
-                    </h1>
-                    <p class="lead mb-0">نظرة شاملة على جميع مهامك وإنجازاتك</p>
-                </div>
-                <div class="col-md-6">
-                    <div class="d-flex justify-content-end">
-                        <div class="task-counter me-3">
-                            <div class="d-flex align-items-center">
-                                <i class="fas fa-clipboard-list fa-2x me-3"></i>
-                                <div>
-                                    <h4 class="mb-0">{{ total_tasks }} مهام</h4>
-                                    <small class="opacity-75">إجمالي المهام</small>
+            <div class="header-content">
+                <div class="header-row">
+                    <div class="header-col">
+                        <div class="text-section">
+                            <h1>
+                                <i class="fas fa-tasks"></i>
+                                لوحة إدارة المهام
+                            </h1>
+                            <p class="lead">نظرة شاملة على جميع مهامك وإنجازاتك</p>
+                        </div>
+                    </div>
+                    <div class="header-col">
+                        <div class="counters-section">
+                            <div class="task-counter">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-clipboard-list"></i>
+                                    <div>
+                                        <h4 class="mb-0">{{ total_tasks }} مهام</h4>
+                                        <small class="opacity-75">إجمالي المهام</small>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="task-counter">
-                            <div class="d-flex align-items-center">
-                                <i class="fas fa-check-circle fa-2x me-3"></i>
-                                <div>
-                                    <h4 class="mb-0">{{ completed_tasks.count }} مكتملة</h4>
-                                    <small class="opacity-75">معدل إنجاز {{ completion_rate }}%</small>
+                            <div class="task-counter">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-check-circle"></i>
+                                    <div>
+                                        <h4 class="mb-0">{{ completed_tasks.count }} مكتملة</h4>
+                                        <small class="opacity-75">معدل إنجاز {{ completion_rate }}%</small>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -224,6 +439,7 @@
                 </div>
             </div>
         </div>
+
 
         <!-- Main Content -->
         <div class="p-4">
@@ -351,24 +567,6 @@
                 
                 <!-- Tasks Column -->
                 <div class="col-lg-9">
-                    <!-- Task Controls -->
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        
-                        <div>
-                            <div class="btn-group" role="group">
-                                <button type="button" class="btn btn-outline-secondary">
-                                    <i class="fas fa-th-list"></i>
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary active">
-                                    <i class="fas fa-grip-horizontal"></i>
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary">
-                                    <i class="fas fa-calendar"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    
                     <!-- Progress Summary -->
                     <div class="card border-0 shadow-sm mb-4">
                         <div class="card-body">

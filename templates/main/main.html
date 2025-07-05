@@ -27,14 +27,14 @@
                 
                 <div class="d-flex gap-3 flex-wrap">
                     {% if user.is_authenticated %}
-                        <a href="#" class="btn btn-light btn-lg">
+                        <a href="{% url "dashboard" %}" class="btn btn-light btn-lg">
                             <i class="fas fa-tachometer-alt"></i> لوحة التحكم
                         </a>
-                        <a href="#" class="btn btn-accent btn-lg">
+                        <a href="{% url "create_task" %}" class="btn btn-accent btn-lg">
                             <i class="fas fa-plus"></i> إنشاء مهمة جديدة
                         </a>
                     {% else %}
-                        <a href="#" class="btn btn-light btn-lg">
+                        <a href="{% url "login" %}" class="btn btn-light btn-lg">
                             <i class="fas fa-user-plus"></i> ابدأ رحلتك الآن
                         </a>
                         <a href="#" class="btn btn-outline-light btn-lg">

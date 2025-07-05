@@ -153,3 +153,4 @@ def all_tasks(request):
         context = {}
 
     return render(request, 'tasks/all_tasks.html', context=context)
+
