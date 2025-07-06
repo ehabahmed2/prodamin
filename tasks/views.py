@@ -7,6 +7,8 @@ from .models import Task
 from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Q
+import json
+from django.http import JsonResponse
 
 
 # Create your views here.
@@ -26,6 +28,7 @@ def dashboard(request):
         
     # recent_tasks
         recent_tasks = tasks.order_by('-created_at')[:4]
+        # get tasks during the week
         context={'tasks':tasks, 
                 'completed_tasks': completed_tasks, 
                 'pending_tasks': pending_tasks, 
@@ -134,7 +137,8 @@ def all_tasks(request):
 
         today_tasks = tasks.filter(due_date=today)
         upcoming_tasks = tasks.filter(due_date__gt=today)
-        overdue_tasks = tasks.filter(due_date__lt=today)
+        overdue_tasks = tasks.filter(due_date__lt=today, is_completed=False)
+
 
         no_date_tasks = tasks.filter(due_date=None)
         
@@ -180,9 +184,30 @@ def delete_task(request, pk):
     if request.method == 'POST':
         task = get_object_or_404(Task, pk=pk, user=request.user)
         task.delete()
-        messages.success(request, 'Task deleted successfully!')
+        messages.success(request, 'تم حذف المهمة')
         return redirect('all_tasks')
 
+
+# togle completion
+def toggle_completion(request, pk):
+    # get the task
+    if request.method=='POST':
+        
+        task = get_object_or_404(Task, pk=pk, user=request.user)
+        try:
+            # get the completed teask, if not completed witch it
+            data = json.loads(request.body)
+            task.is_completed = data.get('completed', not task.is_completed)
+            task.save()
+            
+            # return the json response
+            return JsonResponse({
+                            'success': True,
+                            'is_completed': task.is_completed
+                        })
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=400)
+    return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
 
 
 

@@ -937,80 +937,59 @@
 
 {% block extra_js %}
 <script>
-    // Task checkbox functionality
     document.querySelectorAll('.task-checkbox').forEach(checkbox => {
         checkbox.addEventListener('click', function() {
             const taskId = this.getAttribute('data-task-id');
             const isCompleted = this.classList.contains('checked');
-            
-            // Toggle visual state
-            this.classList.toggle('checked');
-            
-            // Find parent task card
-            const taskCard = this.closest('.task-card');
-            
-            // If marking as complete
-            if (!isCompleted) {
-                // Add completed class after animation
-                setTimeout(() => {
-                    taskCard.classList.add('completed-task');
-                    
-                    // Move to completed section (in a real app, this would be an AJAX call)
-                    if (!taskCard.classList.contains('completed-task')) {
-                        const completedSection = document.querySelector('#completedTasks .row');
-                        if (completedSection) {
-                            completedSection.appendChild(taskCard);
-                        }
+            const checkboxElem = this;
+            // Send AJAX request to toggle completion
+            fetch(`/tasks/toggle-completion/${taskId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ completed: !isCompleted })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Toggle visual state based on response
+                if (data.success) {
+                    checkboxElem.classList.toggle('checked');
+                    const taskCard = checkboxElem.closest('.task-card');
+                    if (data.is_completed) {
+                        taskCard.classList.add('completed-task');
+                    } else {
+                        taskCard.classList.remove('completed-task');
                     }
-                }, 300);
-            } else {
-                // Remove completed class
-                taskCard.classList.remove('completed-task');
+                }
+            })
+            .catch(error => {
+                alert('حدث خطأ أثناء تحديث حالة المهمة');
+                console.error(error);
+            });
+        });
+    });
+
+    // Helper to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
             }
-            
-            // In a real app, you would make an AJAX call to update the task status
-            console.log(`Task ${taskId} marked as ${isCompleted ? 'incomplete' : 'complete'}`);
-        });
-    });
-    
-    // Toggle completed tasks section
-    document.querySelector('.toggle-completed').addEventListener('click', function() {
-        const icon = this.querySelector('i');
-        if (icon.classList.contains('fa-eye-slash')) {
-            icon.classList.remove('fa-eye-slash');
-            icon.classList.add('fa-eye');
-        } else {
-            icon.classList.remove('fa-eye');
-            icon.classList.add('fa-eye-slash');
         }
-    });
-    
-    // Filter functionality
-    document.querySelectorAll('.form-check-input').forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            const filterType = this.id.replace('filter-', '');
-            console.log(`Filter ${filterType} toggled to ${this.checked}`);
-            // In a real app, you would filter tasks based on selection
-        });
-    });
-    
-    // Today badge animation
-    document.querySelectorAll('.today-task').forEach(task => {
-        task.style.animation = 'pulse 3s infinite';
-    });
-    
-    // Sort functionality
-    document.querySelectorAll('.sortable-header').forEach(header => {
-        header.addEventListener('click', function() {
-            const sortType = this.getAttribute('data-sort');
-            console.log(`Sorting by ${sortType}`);
-            // In a real app, you would sort tasks
-        });
-    });
-    
-    // Initialize tooltips
-    document.querySelectorAll('[title]').forEach(el => {
-        new bootstrap.Tooltip(el);
-    });
+        return cookieValue;
+    }
 </script>
 {% endblock %}
