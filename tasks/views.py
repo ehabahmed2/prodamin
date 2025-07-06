@@ -5,6 +5,7 @@ from django.shortcuts import redirect
 from django.contrib import messages
 from .models import Task
 from django.utils import timezone
+import datetime
 from datetime import timedelta
 from django.db.models import Q
 import json
@@ -28,12 +29,29 @@ def dashboard(request):
         
     # recent_tasks
         recent_tasks = tasks.order_by('-created_at')[:4]
-        # get tasks during the week
+        
+        
+        # Weekly productivity data
+        now = timezone.now()
+        week_ago = now - timedelta(days=6)
+        days = [week_ago + timedelta(days=i) for i in range(7)]
+        productivity_data = []
+        for day in days: 
+            count = tasks.filter(
+                is_completed=True,
+                completed_at__date=day.date()
+            ).count()
+            productivity_data.append({
+                'date': day.strftime('%a'), # this returns the days
+                'tasks': count,
+            })
         context={'tasks':tasks, 
                 'completed_tasks': completed_tasks, 
                 'pending_tasks': pending_tasks, 
                 'completion_rate': completion_rate, 
-                'recent_tasks': recent_tasks}
+                'recent_tasks': recent_tasks,
+                'productivity_data': productivity_data,
+                }
     else:
         context = {}
     return render(request, 'tasks/dashboard.html', context=context)
@@ -190,24 +208,34 @@ def delete_task(request, pk):
 
 # togle completion
 def toggle_completion(request, pk):
-    # get the task
-    if request.method=='POST':
-        
+    if request.method == 'POST':
         task = get_object_or_404(Task, pk=pk, user=request.user)
+        
         try:
-            # get the completed teask, if not completed witch it
             data = json.loads(request.body)
-            task.is_completed = data.get('completed', not task.is_completed)
-            task.save()
+            # Get new completion status (toggle if not provided)
+            new_status = data.get('completed', not task.is_completed)
             
-            # return the json response
+            # Update completion fields
+            if new_status:  # Marking as complete
+                if not task.is_completed:  # Only update if status changed
+                    task.completed_at = timezone.now()
+            else:  # Marking as incomplete
+                if task.is_completed:  # Only update if status changed
+                    task.completed_at = None
+            
+            task.is_completed = new_status
+            task.save()  # CRITICAL: Save changes to database
+
             return JsonResponse({
-                            'success': True,
-                            'is_completed': task.is_completed
-                        })
+                'success': True,
+                'is_completed': task.is_completed,
+                'completed_at': task.completed_at.isoformat() if task.completed_at else None
+            })
+            
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)}, status=400)
+            
     return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
-
 
 
